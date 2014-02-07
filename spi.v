@@ -25,6 +25,7 @@ module SPI_slave(clk, sck, mosi, miso, ssel, byteReceived, receivedData, dataNee
       sckr <= { sckr[0], sck };
   end
   wire sck_risingEdge = (sckr == 2'b01);
+  wire sck_fallingEdge = (sckr == 2'b10);
         
   always @(posedge clk) begin
     if(~ssel_active)
@@ -37,7 +38,7 @@ module SPI_slave(clk, sck, mosi, miso, ssel, byteReceived, receivedData, dataNee
   always @(posedge clk) begin
     if(~ssel_active) begin
       bitcnt <= 3'b000;
-      receivedData <= 8'b00000000;
+      receivedData <= 8'h00;
     end
     else if(sck_risingEdge) begin
       bitcnt <= bitcnt + 3'b001;
@@ -47,16 +48,16 @@ module SPI_slave(clk, sck, mosi, miso, ssel, byteReceived, receivedData, dataNee
   
   always @(posedge clk)
     byteReceived <= ssel_active && sck_risingEdge && (bitcnt == 3'b111);
-    
+
   always @(posedge clk) begin
     if(~ssel_active)
       dataToSendBuffer <= 8'h00;
     else if(bitcnt == 3'b000)
       dataToSendBuffer <= dataToSend;
-    else if(sck_risingEdge)
+    else if(sck_fallingEdge)
       dataToSendBuffer <= { dataToSendBuffer[6:0], 1'b0};
   end
-  
+    
   assign dataNeeded = ssel_active && (bitcnt == 3'b000);
   assign miso = dataToSendBuffer[7];
 endmodule
