@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 
 module SPI_slave(clk, sck, mosi, miso, ssel, byteReceived, receivedData, dataNeeded, dataToSend);
   input wire clk;
